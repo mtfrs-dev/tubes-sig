@@ -1,11 +1,11 @@
 @extends('template.master')
 
-@section('title', 'Detail')
+@section('title', 'Detail - '.ucwords($object_type))
 
 @section('head')
 <script>
-    var detailData = @json($data);
-    console.log(detailData)
+    var detailData = {!! json_encode($data) !!};
+    var rekomendasi = {!! json_encode($rekomendasi) !!};
 </script>
 @endsection
 
@@ -13,17 +13,12 @@
     <div class="banner-full"
         style="background: linear-gradient(to bottom, hsla(0, 0%, 30.2%, 0.7), hsla(0, 0%, 30.2%, 0.7)), url({{ asset('img/banner.png') }}) no-repeat center center / cover;">
         <div>
-            <p class="banner-full__header">Teropong Kota</p>
-            <p>Jl. Tamin, Pasir Gintung, Kec. Tj. Karang Pusat, Kota Bandar Lampung, Lampung 35121
-            </p>
-            <p> +62 818 0304 4553
-            </p>
-            <div class="recommend__rating">
+            <p class="banner-full__header">{{ $data->nama }}</p>
+            <p>{{ $data->alamat }}</p>
+            <p> {{ $data->no_telp }}</p>
+            <div class="recommend__rating" style="display: flex; gap: 8px; justify-items: center;">
                 <div class="recommend__star">★</div>
-                <div class="recommend__star ">★</div>
-                <div class="recommend__star ">★</div>
-                <div class="recommend__star nofill">☆</div>
-                <div class="recommend__star nofill">☆</div>
+                <div style="color: white; font-weight: 700;">({{ floatval($data->rating) }} / 5.0)</div>
             </div>
         </div>
 
@@ -38,9 +33,9 @@
     <div class="map__detail" id="map"></div>
     <p class="recommend__text">
         @if ($object_type == 'sarana olahraga')
-        Rekomendasi Tempat Olahraga Lainnya
+            Rekomendasi Tempat Olahraga Lainnya
         @else
-        Rekomendasi Tempat Wisata Lainnya
+            Rekomendasi Tempat Wisata Lainnya
         @endif
     </p>
     <div class="recommend detail">
@@ -53,6 +48,7 @@
 
             <div class="recommend__info">
                 <p class="recommend__header">{{ $item->nama }}</p>
+                <p id="jarak{{$item->id}}"></p>
                 <div class="recommend__rating">
                     {{ $item->rating }}
 
@@ -83,25 +79,24 @@
     <script>
         L.Routing.control({
             waypoints: [
-                L.latLng(-5.368469, 105.290952),
+                L.latLng(-5.361098,105.291406),
                 L.latLng(detailData.latitude, detailData.longitude)
             ]
         }).addTo(map);
         circle.remove();
-        function cekJarak(lat,leng,x){
-            let destination = L.latLng(lat,leng)
+        function cekJarak(lat,lng,x){
+            let destination = L.latLng(lat,lng)
             let wp2 = new L.Routing.Waypoint(destination);
             let routeUS = new L.Routing.osrmv1();
             routeUS.route([wp1,wp2],(err,obj)=>{
                 if(!err){
                     var jarak = obj[0].summary.totalDistance ;
-                    document.getElementById('jarak'+x).innerHTML = "Jarak " + jarak + " m";
+                    document.getElementById('jarak'+x).innerHTML = "Jarak " + (jarak/1000).toFixed(1) + " km";
                 }
             })
         }
-        
-        s.forEach(x => {
-            cekJarak(x.latitude,x.longitude,x.id)
+        rekomendasi.forEach(item => {
+            cekJarak(item.latitude,item.longitude,item.id)
         });
     </script>
 @endsection

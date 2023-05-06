@@ -100,11 +100,11 @@ def running():
 
     print("Hello Welcome!")
     
-    print("Input 1 For Add Extension Postgis")
-    print("Input 2 For Create Table Object")
-    print("Input 3 For Start Injecting Object Data")
-    # print("Input 4 For Start Injecting Asset Data")
-    print("Input 99 For Close this Prompt")
+    print("Input 1 to Add Extension Postgis")
+    print("Input 2 to Create Table Object")
+    print("Input 3 to Start Injecting Object Data")
+    # print("Input 4 to Start Injecting Asset Data")
+    print("Input 99 to Close this Prompt")
     print()
     option = input("Insert your option : ")
 

@@ -1,11 +1,13 @@
 @extends('template.master')
 
-@section('title', $object_type)
+@section('title', ucwords($object_type))
 
 @section('head')
-<script>
-    var s = @json($data);
-</script>
+    <script>
+        let data = {!! json_encode($data) !!};
+        let myLat = {!! json_encode($myLatitude) !!};
+        let myLng = {!! json_encode($myLongitude) !!};
+    </script>
 @endsection
 
 @section('banner')
@@ -30,11 +32,13 @@
 @endsection
 
 @section('content')
-    @if ($object_type == 'sarana olahraga')
-        <form id="searchForm" method="get" action="{{ route('olahraga.index') }}">
-    @else
-        <form id="searchForm" method="get" action="{{ route('wisata.index') }}">
-    @endif
+    <form id="searchForm" method="get"
+        action="{{ 
+            $object_type == 'sarana olahraga' ? 
+                route('olahraga.index') 
+                : 
+                route('wisata.index') 
+        }}">
         <input type="text" style="display: none" name="sortby" value="distance" id="inputSort">
         <div class="d-flex justify-content-between search">
             <input list="search" class="search__input" id="searchLoc" name="search" value="{{$search_key}}"
@@ -48,8 +52,10 @@
             <button type="submit" class="search__button">Cari</button>
         </div>
     </form>
+
     <div class="d-flex justify-content-between">
         <div class="map" id="map"></div>
+
         <div class="recommend">
             <div class="dropdown">
                 <button class="dropbtn">Urut Berdasarkan</button>
@@ -60,7 +66,6 @@
                         Terdekat</a>
                 </div>
             </div>
-            {{-- card rekomendasi --}}
             @foreach ($data as $item)
 
                 <div class="d-flex mb-5 card__recommend"
@@ -95,7 +100,6 @@
                     </div>
                 </div>
             @endforeach
-            {{-- end card rekomendasi --}}
         </div>
     </div>
 @endsection
@@ -103,34 +107,33 @@
 @section('footer')
     <script src="{{ asset('js/map.js') }}"></script>
     <script>
-        function cek (sortValue){
-            var sort = document.getElementById('inputSort');
-            newSort = sortValue;
-            sort.setAttribute('value',newSort);
-            console.log(sort.value)
-            document.getElementById('searchForm').submit();
-        }
-        
-        function cekJarak(lat,leng,x){
-            let destination = L.latLng(lat,leng)
-            let wp2 = new L.Routing.Waypoint(destination);
-            let routeUS = new L.Routing.osrmv1();
-            routeUS.route([wp1,wp2],(err,obj)=>{
-                if(!err){
-                    var jarak = obj[0].summary.totalDistance ;
-                    document.getElementById('jarak'+x).innerHTML = "Jarak " + jarak + " m";
-                }
-            })
-        }
-        
-        s.forEach(x => {
-            cekJarak(x.latitude,x.longitude,x.id)
+        document.addEventListener("DOMContentLoaded", function() {
+            // console.log("My Location : "+myLocation);
+            // console.log("WP1 : "+wp1);
+            function cek (sortValue){
+                var sort = document.getElementById('inputSort');
+                newSort = sortValue;
+                sort.setAttribute('value',newSort);
+                document.getElementById('searchForm').submit();
+            }
+            
+            function cekJarak(lat,long,id){
+                let destination = L.latLng(lat,long)
+                let wp2 = new L.Routing.Waypoint(destination);
+                // console.log(wp1);
+                // console.log(wp2);
+                let routeUS = new L.Routing.osrmv1();
+                routeUS.route([wp1,wp2],(err,obj)=>{
+                    if(!err){
+                        var jarak = obj[0].summary.totalDistance ;
+                        document.getElementById('jarak'+id).innerHTML = "Jarak " + (jarak/1000).toFixed(1) + " km";
+                    }
+                })
+            }
+            
+            data.forEach(item => {
+                cekJarak(item.latitude,item.longitude,item.id)
+            });
         });
-    </script>
-    <script>
-        // console.log(cekJarak(s[0].latitude,s[0].longitude))
-        // s.forEach(data => {
-        //     console.log(cekJarak (data.latitude,data.longitude)) 
-        // });
     </script>
 @endsection

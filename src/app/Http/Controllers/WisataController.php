@@ -13,13 +13,19 @@ class WisataController extends Controller
     //
     public function index(Request $request){
         $object_type = 'wisata';
+
         $sortby_key = $request['sortby'];
         $search_key = $request['search'];
         
-        $ip = $_SERVER['REMOTE_ADDR'];
-        // echo $ip;
-        // $currentLocation = GeoIP::getLocation($ip);
-        $currentLocation = GeoIP::getLocation('111.94.186.184');
+        // Send a GET request to the ip-api.com/json API
+        $response = file_get_contents('http://ip-api.com/json');
+
+        // Decode the JSON response into a PHP object
+        $ipData = json_decode($response);
+        
+        // Get Current Location
+        $currentLocation = GeoIP::getLocation($ipData->query);
+
         $myLatitude = $currentLocation['lat'];
         $myLongitude = $currentLocation['lon'];
 
